@@ -1,7 +1,8 @@
 {
-  "name": "Jamstacks starter",
-  "description": "A neutral Next.js foundation for Jamstacks websites.",
-  "domain": "",
+  "name": "Sunrise Lotus Yoga",
+  "description": "Gentle yoga by Lake Merritt, Oakland: sunrise flow, yin, restorative and prenatal classes, a weekly timetable, kind teachers and a $45 intro fortnight.",
+  "domain": "next-yoga-flow.jamstacks.net",
+  "timeZone": "America/Los_Angeles",
   "jamstacks": {
     "siteId": "",
     "cdnUrl": "https://cdn.jamstacks.net"

@@ -1,5 +1,5 @@
 {
-  "name": "next-jamstacks-starter",
+  "name": "next-yoga-flow",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -17,6 +17,8 @@
     "node": ">=24"
   },
   "dependencies": {
+    "@fontsource-variable/jost": "^5.3.0",
+    "@fontsource/marcellus": "^5.3.0",
     "@tailwindcss/postcss": "4.3.5",
     "jamstacks": "^0.1.2",
     "next": "16.4.6",

@@ -1,0 +1,15 @@
+{
+  "name": "Sunrise Lotus Yoga",
+  "description": "Gentle, sunrise-toned yoga studio with a weekly timetable, class styles, teachers and an intro offer.",
+  "tech": "next",
+  "type": "yoga",
+  "style": "flow",
+  "internal": false,
+  "components": ["support-form"],
+  "configFile": "site.config.json",
+  "screenshots": {
+    "light": "jamstacks/home-light.jpg",
+    "dark": "jamstacks/home-dark.jpg",
+    "theme": { "strategy": "media" }
+  }
+}

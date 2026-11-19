@@ -48,6 +48,29 @@ the existing sections/items/price/availability model; changes such as sold out, 
 should be data edits with actionable content tests. Do not add business content to configuration: the
 Jamstacks provisioner replaces that file wholesale, possibly adding `provisioningId`.
 
+## Sunrise Lotus design: "Dawn over the lotus pond"
+
+Every page is a sunrise seen from the edge of a still pond. The home hero shows the pond at first
+light, with a matching blue-hour illustration in dark mode. Sections hand over through wavy
+strata instead of boxes. Scrolling the home page passes through one day from the hero to the sunrise
+timetable strip, lily pond, the full saffron sun of the $45 offer, midday teachers, and dusk at the
+Pergola. The footer is the evening pond. Dark mode ("Blue hour") keeps the whole page before
+sunrise with a low glow and faint stars.
+
+| What | Where |
+| --- | --- |
+| Day-cycle section colours (`--day-*`), water, lily pad and horizon tokens | `app/tailwind.input.css`, light and both dark blocks |
+| Display type scale (`display-hero`, `display-xl`, `display-lg`, `display-md`) and lily-pad styles | `app/tailwind.input.css` |
+| Home hero illustrations for light and dark mode | `public/yoga-light.webp` and `public/yoga-dark.webp` |
+| Sky strata, sun, hills and reflection for page headings and section illustrations | `components/art/lotus-sunrise.tsx` |
+| Section hand-overs (`Strata`) and the Pergola horizon | `components/art/dividers.tsx` |
+| The large sun disc behind the intro price | `components/rising-sun.tsx` |
+
+Fonts are Marcellus (`@fontsource/marcellus`) and Jost (`@fontsource-variable/jost`), both under the
+SIL Open Font License. To update the hero artwork, replace both WebP files. Use matching landscape
+compositions with quiet space on the left for the desktop headline. On smaller screens the
+illustration sits below the copy.
+
 ## Appearance and optional local-business features
 
 The starter uses system fonts, neutral Tailwind v4 tokens and the published `jamstacks` package's

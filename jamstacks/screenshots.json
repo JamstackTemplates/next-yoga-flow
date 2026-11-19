@@ -1,0 +1,22 @@
+{
+  "templateId": "next-yoga-flow",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "fullPage": false,
+  "captures": [
+    {
+      "mode": "light",
+      "sha256": "02c9465cb6b08dec3e753c0393fc06a4c634fef848fb77c909e742456080641e",
+      "file": "jamstacks/home-light.jpg",
+      "bytes": 122110
+    },
+    {
+      "mode": "dark",
+      "sha256": "f8808a4d2702d928bc0c13581b8e586c9ee4c08a69edd4dd716f6976ccae255d",
+      "file": "jamstacks/home-dark.jpg",
+      "bytes": 117868
+    }
+  ]
+}

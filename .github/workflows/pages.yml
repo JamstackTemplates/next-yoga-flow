@@ -1,0 +1,113 @@
+name: Build and deploy to GitHub Pages
+# Jamstacks dispatches this workflow with a provisioning_id and finds the run by this exact title.
+run-name: ${{ inputs.provisioning_id && format('Jamstacks {0}', inputs.provisioning_id) || 'Build and deploy to GitHub Pages' }}
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      provisioning_id:
+        description: Jamstacks provisioning operation correlation ID
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Test configuration and content
+        run: npm test
+      - name: Check TypeScript
+        run: npm run typecheck
+      # GitHub ignores CNAME files for Actions deployments; the custom domain is a repository setting.
+      # Setting it needs Administration write, which GITHUB_TOKEN cannot have, so it uses an optional
+      # PAGES_ADMIN_TOKEN secret (fine-grained: Administration + Pages write). Runs before
+      # configure-pages so this build already gets the root base path and custom-domain URL.
+      - name: Set GitHub Pages custom domain
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.PAGES_ADMIN_TOKEN }}
+          REPO: ${{ github.repository }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          OWNER: ${{ github.repository_owner }}
+          SITE_DOMAIN: ${{ vars.SITE_DOMAIN }}
+        run: |
+          domain="${SITE_DOMAIN:-$(node -p "require('./site.config.json').domain || ''")}"
+          if [ -z "$domain" ] && [ "$OWNER" = "JamstackTemplates" ]; then domain="$REPO_NAME.jamstacks.net"; fi
+          if [ -z "$domain" ]; then echo "No site domain configured; leaving Pages domain unchanged."; exit 0; fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice::PAGES_ADMIN_TOKEN is not set; set the Pages custom domain to $domain in repository settings."
+            exit 0
+          fi
+          pages="$(gh api "repos/$REPO/pages" || echo '{}')"
+          if [ "$(jq -r '.cname // ""' <<< "$pages")" != "$domain" ]; then
+            if gh api -X PUT "repos/$REPO/pages" -f cname="$domain" > /dev/null; then
+              echo "Set Pages custom domain to $domain. HTTPS is enforced on a later deploy once its certificate is issued."
+            else
+              echo "::warning::Could not set the Pages custom domain to $domain; check PAGES_ADMIN_TOKEN permissions."
+            fi
+            exit 0
+          fi
+          echo "Pages custom domain is already $domain."
+          if [ "$(jq -r '.https_enforced' <<< "$pages")" != "true" ]; then
+            if gh api -X PUT "repos/$REPO/pages" -F https_enforced=true > /dev/null 2>&1; then
+              echo "Enforced HTTPS for $domain."
+            else
+              echo "::notice::The HTTPS certificate for $domain is not ready yet; HTTPS will be enforced on a later deploy."
+            fi
+          fi
+      - name: Read GitHub Pages configuration
+        id: pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - name: Build static website
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+          NEXT_PUBLIC_SITE_DOMAIN: ${{ vars.SITE_DOMAIN }}
+          JAMSTACKS_SITE: ${{ vars.JAMSTACKS_SITE }}
+          NEXT_PUBLIC_JAMSTACKS_CDN_URL: ${{ vars.JAMSTACKS_CDN_URL }}
+      - name: Upload static website
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: out
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v5
